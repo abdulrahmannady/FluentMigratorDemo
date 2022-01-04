@@ -5,8 +5,6 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentMigratorDemo", "FluentMigratorDemo\FluentMigratorDemo.csproj", "{FAF73275-0C78-46F0-85FB-C24624302976}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtensionMethodDemo", "ExtensionMethodDemo\ExtensionMethodDemo.csproj", "{40D6B6C1-350E-4804-B844-BE89BE63650B}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,10 +15,6 @@ Global
 		{FAF73275-0C78-46F0-85FB-C24624302976}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FAF73275-0C78-46F0-85FB-C24624302976}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FAF73275-0C78-46F0-85FB-C24624302976}.Release|Any CPU.Build.0 = Release|Any CPU
-		{40D6B6C1-350E-4804-B844-BE89BE63650B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{40D6B6C1-350E-4804-B844-BE89BE63650B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{40D6B6C1-350E-4804-B844-BE89BE63650B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{40D6B6C1-350E-4804-B844-BE89BE63650B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
