@@ -6,6 +6,7 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Threading.Tasks;
+using Cocona;
 
 namespace FluentMigratorDemo
 {
@@ -60,35 +61,100 @@ namespace FluentMigratorDemo
     #endregion
 
     #region interact with cmd for migration
+    //class Program
+    //{
+    //    private static async Task Main(string[] args)
+    //    {
+    //        var upOption = new Option("--up", "Migrate Up");
+    //        upOption.Argument = new Argument<bool>(() => false);
+    //        var downOption = new Option("--down", "Rollback database to a version");
+    //        downOption.Argument = new Argument<long>(() => -1);
+
+    //        var rootCommand = new RootCommand("NewValley Fluent Migrator Runner");
+    //        rootCommand.AddOption(upOption);
+    //        rootCommand.AddOption(downOption);
+    //        rootCommand.Handler = CommandHandler.Create<bool, long>((up, down) =>
+    //        {
+    //            var serviceProvider = CreateServices();
+
+    //            using (var scope = serviceProvider.CreateScope())
+    //            {
+    //                if (up)
+    //                    UpdateDatabase(scope.ServiceProvider);
+
+    //                if (down > -1)
+    //                    RollbackDatabase(scope.ServiceProvider, down);
+    //            }
+    //        });
+
+    //        await rootCommand.InvokeAsync(args);
+    //    }
+
+    //    public static IConfigurationRoot Configuration { get; set; }
+
+    //    /// <summary>
+    //    /// Configure the dependency injection services
+    //    /// </sumamry>
+    //    private static IServiceProvider CreateServices()
+    //    {
+    //        var builder = new ConfigurationBuilder()
+    //           .SetBasePath(Directory.GetCurrentDirectory())
+    //           .AddJsonFile("appSettings.json", optional: true, reloadOnChange: true);
+
+    //        //configuration has an hashtable with key, value pairs
+    //        Configuration = builder.Build();
+    //        var connectionString = Configuration["connectionString"];
+
+    //        return new ServiceCollection()
+    //            // Add common FluentMigrator services
+    //            .AddFluentMigratorCore()
+    //            .ConfigureRunner(rb => rb
+    //                // Add Postgres support to FluentMigrator
+    //                .AddSqlServer()
+    //                // Set the connection string
+    //                .WithGlobalConnectionString(connectionString)
+    //                // Define the assembly containing the migrations
+    //                .ScanIn(typeof(Tables).Assembly).For.Migrations())
+    //            // Enable logging to console in the FluentMigrator way
+    //            .AddLogging(lb => lb.AddFluentMigratorConsole())
+    //            // Build the service provider
+    //            .BuildServiceProvider(false);
+    //    }
+
+    //    private static void UpdateDatabase(IServiceProvider serviceProvider)
+    //    {
+    //        var runner = serviceProvider.GetRequiredService<IMigrationRunner>();
+    //        runner.MigrateUp();
+    //    }
+
+    //    private static void RollbackDatabase(IServiceProvider serviceProvider, long rollbackVersion)
+    //    {
+    //        var runner = serviceProvider.GetRequiredService<IMigrationRunner>();
+    //        runner.MigrateDown(rollbackVersion);
+    //    }
+    //}
+    #endregion
+
+    #region interact with cmd Using Cocona
     class Program
     {
         private static async Task Main(string[] args)
         {
-            var upOption = new Option("--up", "Migrate Up");
-            upOption.Argument = new Argument<bool>(() => false);
-            var downOption = new Option("--down", "Rollback database to a version");
-            downOption.Argument = new Argument<long>(() => -1);
+            var app = CoconaLiteApp.Create();
 
-            var rootCommand = new RootCommand("NewValley Fluent Migrator Runner");
-            rootCommand.AddOption(upOption);
-            rootCommand.AddOption(downOption);
-            rootCommand.Handler = CommandHandler.Create<bool, long>((up, down) =>
+            var serviceProvider = CreateServices();
+            using (var scope = serviceProvider.CreateScope())
             {
-                var serviceProvider = CreateServices();
+                app.AddCommand("up", () => UpdateDatabase(scope.ServiceProvider))
+                    .WithDescription("Migrate Database Up!");
 
-                using (var scope = serviceProvider.CreateScope())
+                app.AddCommand("down", ([Argument] int value) =>
                 {
-                    if (up)
-                        UpdateDatabase(scope.ServiceProvider);
-
-                    if (down > -1)
-                        RollbackDatabase(scope.ServiceProvider, down);
-                }
-            });
-
-            await rootCommand.InvokeAsync(args);
+                    if (value > -1) RollbackDatabase(scope.ServiceProvider, value);
+                }).WithDescription("Migrate Database down to specific value");
+            }
+            app.Run();
         }
-
         public static IConfigurationRoot Configuration { get; set; }
 
         /// <summary>
@@ -99,7 +165,7 @@ namespace FluentMigratorDemo
             var builder = new ConfigurationBuilder()
                .SetBasePath(Directory.GetCurrentDirectory())
                .AddJsonFile("appSettings.json", optional: true, reloadOnChange: true);
-            
+
             //configuration has an hashtable with key, value pairs
             Configuration = builder.Build();
             var connectionString = Configuration["connectionString"];
@@ -122,13 +188,13 @@ namespace FluentMigratorDemo
 
         private static void UpdateDatabase(IServiceProvider serviceProvider)
         {
-            var runner = serviceProvider.GetRequiredService<IMigrationRunner>();
+            var runner = ServiceProviderServiceExtensions.GetRequiredService<IMigrationRunner>(serviceProvider);
             runner.MigrateUp();
         }
 
         private static void RollbackDatabase(IServiceProvider serviceProvider, long rollbackVersion)
         {
-            var runner = serviceProvider.GetRequiredService<IMigrationRunner>();
+            var runner = ServiceProviderServiceExtensions.GetRequiredService<IMigrationRunner>(serviceProvider);
             runner.MigrateDown(rollbackVersion);
         }
     }
